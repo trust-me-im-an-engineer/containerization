@@ -20,4 +20,8 @@ Host <container-name>
 
 * Open codex extention and Sign in via host browser. There's a limitation: at the moment of signing in only one container should be up. Otherwise there's port conflict. So make sure to stop other containers to avoid this.
 
-It's recommended to make a container per each project and use fine-grained personal access tokens with access only to this project repository as your remote git credentials. 
+It's recommended to make a container per each project and use fine-grained personal access tokens with access only to this project repository as your remote git credentials.
+
+Run codex in full access to avoid manually approving permission requests. It *should* be safe as it's containerized and only working directory is mounted. You can check with your terminal what you can access - if you can't reach it, than agent couldnt either (hopefully).
+
+As agent has full access to mounted directory - consider it compromized and don't put any production creds in it.
