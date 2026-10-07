@@ -1,9 +1,11 @@
 This simple container setup isolates codex from your host system. It does so by creating an unprivileged container with openssh-server. Connect your host vscode to the container via ssh to get a near-native development experience with isolation safety.
 
 # usage
+* CD into your project directory. Current directory will be mounted to container as RW!
+
 * Create container:
 ```bash
-SSH_PORT=<some free host port> podman compose --file <path to containerization>/compose.yml -p <container name> up -d
+SSH_PORT=<some free host port> <podman/docker> compose --file <path to containerization>/compose.yml -p <container name> up -d
 ```
 
 * Install `ms-vscode.remote-explorer` extension on host vscode;
