@@ -1,0 +1,29 @@
+services:
+  dev:
+    image: localhost/codex-ssh:latest
+    container_name: "${COMPOSE_PROJECT_NAME}-dev"
+    working_dir: /workspace
+
+    ports:
+      - "127.0.0.1:${SSH_PORT}:2222"
+
+    security_opt:
+      - label=disable
+      - no-new-privileges
+
+    volumes:
+      - "${PWD}:/workspace"
+      - "${HOME}/.ssh/id_ed25519.pub:/root/.ssh/authorized_keys:ro,Z"
+      - vscode-server-cache:/root/.vscode-server
+      - ssh-host-keys:/etc/ssh/hostkeys
+
+    pids_limit: 512
+    mem_limit: 4g
+    cpus: 4
+
+volumes:
+  vscode-server-cache:
+    name: vscode-server-cache
+
+  ssh-host-keys:
+    name: codex-ssh-host-keys
