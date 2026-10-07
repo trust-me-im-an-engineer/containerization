@@ -19,3 +19,5 @@ Host <container-name>
 * Connect to container via installed Remote Explorer extention;
 
 * Open codex extention and Sign in via host browser. There's a limitation: at the moment of signing in only one container should be up. Otherwise there's port conflict. So make sure to stop other containers to avoid this.
+
+It's recommended to make a container per each project and use fine-grained personal access tokens with access only to this project repository as your remote git credentials. 
