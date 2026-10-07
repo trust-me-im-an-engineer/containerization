@@ -14,9 +14,8 @@ Host <container-name>
   HostName 127.0.0.1
   Port <host port you used as SSH_PORT>
   User root
-  LocalForward 1455 127.0.0.1:1455
 ```
 
 * Connect to container via installed Remote Explorer extention;
 
-* Open codex extention and Sign in via host browser (that's what LocalForward port is for).
+* Open codex extention and Sign in via host browser. There's a limitation: at the moment of signing in only one container should be up. Otherwise there's port conflict. So make sure to stop other containers to avoid this.
