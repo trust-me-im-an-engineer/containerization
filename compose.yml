@@ -17,7 +17,7 @@ services:
     network_mode: bridge
 
     volumes:
-      - "${PWD}:/workspace"
+      - "${PROJECT_PATH}:/workspace"
       - "${HOME}/.ssh/id_ed25519.pub:/tmp/ssh-authorized-key:ro"
       - vscode-server-cache:/root/.vscode-server
       - ssh-host-keys:/etc/ssh/hostkeys

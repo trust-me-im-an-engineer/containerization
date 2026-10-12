@@ -5,14 +5,15 @@ This container setup isolates codex from your host system. It does so by creatin
 
 * Create container:
 ```bash
-SSH_PORT=<some free host port> docker compose --file <path to containerization>/compose.yml -p <container name> up -d
+SSH_PORT=<some-free-host-port> PROJECT_PATH=<~/projects/example> \
+docker compose --file <~/path/to/containerization/compose.yml> -p <your-container-name> up
 ```
 
 * Install `ms-vscode.remote-explorer` extension on host vscode;
 
 * Add ssh entry to ~/.ssh/config:
 ```
-Host <container-name>
+Host <your-container-name>
   HostName 127.0.0.1
   Port <host port you used as SSH_PORT>
   User root
