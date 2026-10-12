@@ -1,25 +1,18 @@
 This container setup isolates codex from your host system. It does so by creating docker container with gvisor isolation and openssh-server inside. Connect your host vscode to the container via ssh to get a near-native development experience with isolation safety.
 
 # usage
-* CD into your project directory. Current directory will be mounted to container as RW!
-
-* Create container:
+* Start a container for your project directory (it will be mounted read/write):
 ```bash
-SSH_PORT=<some-free-host-port> PROJECT_PATH=<~/projects/example> \
-docker compose --file <~/path/to/containerization/compose.yml> -p <your-container-name> up
+python3 /path/to/containerization/codex-container.py ~/projects/example [--name <project-name>]
 ```
 
-* Install `ms-vscode.remote-explorer` extension on host vscode;
+The SSH host and Compose project default to the directory name (`example` above). To choose another name, add `--name my-project`.
 
-* Add ssh entry to ~/.ssh/config:
-```
-Host <your-container-name>
-  HostName 127.0.0.1
-  Port <host port you used as SSH_PORT>
-  User root
-```
+The launcher lets Docker choose a free localhost SSH port, starts the container, and adds an SSH host to `~/.ssh/codex-containers.d/`. It also adds one `Include` line to `~/.ssh/config`. Run the same command again after restarting or recreating the container to refresh its port. You need Docker Compose, Python 3, and an `~/.ssh/id_ed25519.pub` key on the host.
 
-* Connect to container via installed Remote Explorer extention;
+* Install the `ms-vscode.remote-explorer` extension in host VS Code.
+
+* Connect to the SSH host printed by the launcher in Remote Explorer.
 
 * Open codex extention and Sign in via host browser. There's a limitation: at the moment of signing in only one container should be up. Otherwise there's port conflict. So make sure to stop other containers to avoid this.
 

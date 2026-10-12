@@ -9,7 +9,8 @@ services:
       - ALL
 
     ports:
-      - "127.0.0.1:${SSH_PORT}:2222"
+      - target: 2222
+        host_ip: 127.0.0.1
 
     security_opt:
       - label=disable
@@ -32,8 +33,10 @@ services:
 volumes:
   vscode-server-cache:
     name: vscode-server-cache
+    external: true
 
   ssh-host-keys:
     name: codex-ssh-host-keys
+    external: true
 
   inner-docker-storage:
