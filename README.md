@@ -40,3 +40,5 @@ services:
 ```
 
 Run docker compose like `docker compose -f compose.yaml -f compose.gvisor.yaml up` to override main compose with gvisor compose.
+
+Another limitation: inner container volumes survive not only outer container restart, but recreation and removing too. To clean them up use `docker volume rm your-service_inner-docker-storage`.
