@@ -3,23 +3,31 @@ services:
     image: localhost/codex-ssh:latest
     container_name: "${COMPOSE_PROJECT_NAME}-dev"
     working_dir: /workspace
+    runtime: runsc
+
+    cap_add:
+      - ALL
 
     ports:
       - "127.0.0.1:${SSH_PORT}:2222"
 
     security_opt:
       - label=disable
-      - no-new-privileges
+
+    network_mode: bridge
 
     volumes:
       - "${PWD}:/workspace"
-      - "${HOME}/.ssh/id_ed25519.pub:/root/.ssh/authorized_keys:ro,Z"
+      - "${HOME}/.ssh/id_ed25519.pub:/tmp/ssh-authorized-key:ro"
       - vscode-server-cache:/root/.vscode-server
       - ssh-host-keys:/etc/ssh/hostkeys
+      - inner-docker-storage:/var/lib/docker
 
     pids_limit: 512
     mem_limit: 4g
     cpus: 4
+    init: true
+    stop_grace_period: 10s
 
 volumes:
   vscode-server-cache:
@@ -27,3 +35,5 @@ volumes:
 
   ssh-host-keys:
     name: codex-ssh-host-keys
+
+  inner-docker-storage:

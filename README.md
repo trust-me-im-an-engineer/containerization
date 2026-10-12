@@ -1,11 +1,11 @@
-This simple container setup isolates codex from your host system. It does so by creating an unprivileged container with openssh-server. Connect your host vscode to the container via ssh to get a near-native development experience with isolation safety.
+This container setup isolates codex from your host system. It does so by creating docker container with gvisor isolation and openssh-server inside. Connect your host vscode to the container via ssh to get a near-native development experience with isolation safety.
 
 # usage
 * CD into your project directory. Current directory will be mounted to container as RW!
 
 * Create container:
 ```bash
-SSH_PORT=<some free host port> <podman/docker> compose --file <path to containerization>/compose.yml -p <container name> up -d
+SSH_PORT=<some free host port> docker compose --file <path to containerization>/compose.yml -p <container name> up -d
 ```
 
 * Install `ms-vscode.remote-explorer` extension on host vscode;
@@ -27,3 +27,16 @@ It's recommended to make a container per each project and use fine-grained perso
 Run codex in full access to avoid manually approving permission requests. It *should* be safe as it's containerized and only working directory is mounted. You can check with your terminal what you can access - if you can't reach it, than agent couldnt either (hopefully).
 
 As agent has full access to mounted directory - consider it compromized and don't put any production creds in it.
+
+Running docker inside container is supported, but with out caveat: for networking to work internal containers have to be run with `--networking=host`. It doesn't expose your actual host networking, it uses outer container's network as host network for inner containers.
+
+That means some of compose files won't work as is, and need something like `compose.gvisor.yaml` with network override:
+```yaml
+services:
+  your-service:
+    network_mode: host
+    networks: !reset []
+    ports: !reset []
+```
+
+Run docker compose like `docker compose -f compose.yaml -f compose.gvisor.yaml up` to override main compose with gvisor compose.
