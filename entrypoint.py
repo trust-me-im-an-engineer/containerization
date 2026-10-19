@@ -14,6 +14,8 @@ DOCKER_FLAGS = [
     "--ip6tables=false",
     "--storage-driver=vfs",
 ]
+DOCKER_PID_FILE = Path("/var/run/docker.pid")
+CONTAINERD_PID_FILE = Path("/var/run/docker/containerd/containerd.pid")
 HOST_KEY = Path("/etc/ssh/hostkeys/ssh_host_ed25519_key")
 shutdown_requested = False
 
@@ -62,6 +64,11 @@ def main():
             check=True,
         )
 
+    # /var/run persists across restarts with runsc's overlay disabled. Old PIDs
+    # can refer to unrelated processes in the new container lifetime.
+    DOCKER_PID_FILE.unlink(missing_ok=True)
+    CONTAINERD_PID_FILE.unlink(missing_ok=True)
+
     with open("/var/log/dockerd.log", "a") as docker_log:
         docker = subprocess.Popen(DOCKER_FLAGS, stdout=docker_log, stderr=subprocess.STDOUT)
         try:
@@ -73,10 +80,11 @@ def main():
             raise
 
         try:
+            docker_exit_reported = False
             while not shutdown_requested:
-                if docker.poll() is not None:
+                if docker.poll() is not None and not docker_exit_reported:
                     print("dockerd exited unexpectedly; see /var/log/dockerd.log", flush=True)
-                    break
+                    docker_exit_reported = True
                 if ssh.poll() is not None:
                     print("sshd exited unexpectedly", flush=True)
                     break
@@ -104,4 +112,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

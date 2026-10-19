@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Start a project container and add its SSH host."""
+"""Start or reload project container"""
 
 import argparse
+import json
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -25,12 +27,29 @@ env = os.environ.copy()
 env["PROJECT_PATH"] = str(project)
 
 subprocess.run(compose + ["up", "-d"], env=env, check=True)
-address = subprocess.check_output(compose + ["port", "dev", "2222"], env=env, text=True).strip()
-port = address.rsplit(":", 1)[1]
-
+container = f"{name}-dev"
+details = json.loads(subprocess.check_output(
+    ["docker", "inspect", container], text=True,
+))[0]
+if not details["State"]["Running"]:
+    raise SystemExit(
+        f"{container} exited after startup (exit code "
+        f"{details['State']['ExitCode']}). Check `docker logs {container}` "
+        "and the inner Docker log before trying to connect."
+    )
+published = (details["NetworkSettings"]["Ports"] or {}).get("2222/tcp") or []
+localhost_ports = [binding["HostPort"] for binding in published
+                   if binding["HostIp"] == "127.0.0.1"]
+if len(localhost_ports) != 1:
+    raise SystemExit(
+        f"{container} is running without a published localhost SSH port. "
+        "Docker did not restore its port mapping; check docker inspect before "
+        "recreating the container."
+    )
 ssh = Path.home() / ".ssh"
 hosts = ssh / "codex-containers.d"
 hosts.mkdir(parents=True, exist_ok=True)
+shutil.copyfile(Path(__file__).with_name("ssh-proxy.py"), hosts / "ssh-proxy.py")
 include = "Include ~/.ssh/codex-containers.d/*.conf\n"
 config = ssh / "config"
 current = config.read_text() if config.exists() else ""
@@ -40,7 +59,7 @@ if include.strip() not in current.splitlines():
 (hosts / f"{name}.conf").write_text(
     f"Host {name}\n"
     "  HostName 127.0.0.1\n"
-    f"  Port {port}\n"
+    f"  ProxyCommand python3 ~/.ssh/codex-containers.d/ssh-proxy.py {container}\n"
     "  User root\n"
     "  IdentityFile ~/.ssh/id_ed25519\n"
 )
